@@ -1,0 +1,13 @@
+#!/usr/bin/Rscript
+r=function(x){3*x^2}
+h=function(x){-2*x^3}
+x=seq(-10,20,0.01)
+x0=sqrt(0)
+pdf("3.6.pdf")
+plot(type="l",x,r(x))
+points(x0,r(x0),col="red")
+plot(type="l",x,h(x))
+points(x0,h(x0),col="red")
+plot(type="l",r(x),h(x))
+points(r(x0),h(x0),col="red")
+dev.off()

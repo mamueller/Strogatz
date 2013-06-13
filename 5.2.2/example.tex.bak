@@ -1,0 +1,13 @@
+          consider the following matrix 
+          \[
+ \mathbf{M}=\left(\begin{matrix}1 & -1\\1 & 1\end{matrix}\right)\]          We compute the eigenvalues and the eigenvalues there multiplicity and the eigenvectors:
+          \[
+\begin{bmatrix}\begin{pmatrix}1 + \mathbf{\imath}, & 1, & \begin{bmatrix}\left[\begin{smallmatrix}\mathbf{\imath}\\1\end{smallmatrix}\right]\end{bmatrix}\end{pmatrix}, & \begin{pmatrix}1 - \mathbf{\imath}, & 1, & \begin{bmatrix}\left[\begin{smallmatrix}- \mathbf{\imath}\\1\end{smallmatrix}\right]\end{bmatrix}\end{pmatrix}\end{bmatrix}\]          In detail this means:
+          \[
+\lambda_1=1 + \mathbf{\imath}\hspace{1cm}\lambda_2=1 - \mathbf{\imath}\]\[
+\mathbf{e_1}=\left[\begin{smallmatrix}\mathbf{\imath}\\1\end{smallmatrix}\right]\hspace{1cm}\mathbf{e_2}=\left[\begin{smallmatrix}- \mathbf{\imath}\\1\end{smallmatrix}\right]\]          So the general solution is:
+\begin{eqnarray}
+\mathbf{x}(t)=\left[\begin{smallmatrix}x\\y\end{smallmatrix}\right]&=&c_1 e^{\lambda_1 t}\mathbf{e_1}+c_2 e^{\lambda_2 t}\mathbf{e_2} \nonumber \\&=&\left[\begin{smallmatrix}\mathbf{\imath} c_{1} e^{1 + \mathbf{\imath}} - \mathbf{\imath} c_{2} e^{1 - \mathbf{\imath}}\\c_{1} e^{1 + \mathbf{\imath}} + c_{2} e^{1 - \mathbf{\imath}}\end{smallmatrix}\right]\text{ with } c_1,c_2 \in \mathbb{C} \nonumber \\\end{eqnarray}
+          Remark:\\           These two complex constants actually translate into  four real ones, since $c_1$ and $c_2$ both have a real and an imaginary part.
+	  \\ 	  We can also look at it the other way round: From a more general point of view our two real intitial conditions are actually complex ones with an imaginary part of zero.	  Either way four constants to fullfill four conditions look promising.
+	  Remark:\\ 	  Any two dimensional vectorspace can (by definition) be spanned by 2 lineary independent vectors.	  Any such set is called a base of the vectorspace. 	  To switch to another one one is free to  create new base vectors as linear combinations of the old ones.	  For convinience we would like to have a real base vectors. (We do not loose generality by this choice since we 	  can still multiply them with complex coeffients to regain the complex solutions)	  Remark:\\ 	  Actually in our case of conjugate eigenvectors it is very easy to create an new (real only) base.	  We will proceed to do so right now.

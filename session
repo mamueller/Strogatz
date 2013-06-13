@@ -1,0 +1,63 @@
+mm@matagorda ~/Markus/Caos $ python
+>>> from sympy import *
+>>> x,r,h=symbols("x,r,h")
+>>> r=3*x**2
+>>> h=-2*x**3
+>>> #find the minimum
+... dh=diff(h,x)
+>>> dh
+-6*x**2
+>>> x0=solve(dh,x)
+>>> x0
+[0]
+>>> dr=diff(r,x)
+>>> dr
+6*x
+>>> x0=solve(dr,x)
+>>> x0
+[0]
+
+mm@matagorda ~/Markus/Caos $ R
+> r=function(x){3*x^2}
+> h=function(x){-2*x^3}
+> x=seq(-10,20,0.01)
+> x0=sqrt(0)
+> pdf("3.6.pdf")
+> plot(type="l",x,r(x))
+> points(x0,r(x0),col="red")
+> plot(type="l",x,h(x))
+> points(x0,h(x0),col="red")
+> plot(type="l",r(x),h(x))
+> points(r(x0),h(x0),col="red")
+> dev.off()
+
+Python 2.7.3 (default, Aug 23 2012, 19:35:03) 
+[GCC 4.5.4] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from sympy import *
+>>> x,r,k=symbols("x,r,k")
+>>> r=x**3/(1+x**2)**2
+>>> k=2*x**3/(x**2-1)
+>>> #find the minimum
+... dk=diff(k,x)
+>>> x0=solve(dk,x)
+>>> x0
+[0, -sqrt(3), sqrt(3)]
+>>> dr=diff(r,x)
+>>> x0=solve(dr,x)
+>>> x0
+[0, -sqrt(3), sqrt(3)]
+
+mm@matagorda ~/Markus/Caos $ R
+> r=function(x){x^3/(1+x^2)^2}
+> k=function(x){2*x^3/(x^2-1)}
+> x=seq(1,20,0.01)
+> x0=sqrt(3)
+> pdf("3.7.2.pdf")
+> plot(type="l",x,r(x))
+> points(x0,r(x0),col="red")
+> plot(type="l",x,k(x))
+> points(x0,k(x0),col="red")
+> plot(type="l",k(x),r(x))
+> points(k(x0),r(x0),col="red")
+> dev.off()
