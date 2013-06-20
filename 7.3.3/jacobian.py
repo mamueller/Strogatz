@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # vim: set expandtab ts=4
+# Hello from twutz
 from sympy import *
 
 xdot,ydot,x,y=symbols("xdot,ydot,x,y")
