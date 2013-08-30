@@ -1,26 +1,29 @@
 #!/usr/bin/python
 # vim: set expandtab ts=4
 
+from mpi4py import MPI
 import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
 from matplotlib.backends.backend_pdf import PdfPages
-pp = PdfPages('multipage.pdf')
 
-def f2(X,Y,expr):
+def evalOnGrid(X,Y,expr):
     fpair=lambda xv,yv: expr.subs({x:xv,y:yv}).evalf()
     frows=lambda xrow,yrow:map(fpair,xrow,yrow)
     Z = np.array(map(frows,X,Y),dtype=float)
     return(Z)
+
 x,y=sp.symbols("x,y")
 
-for mu in [-1,-0.5,0,0.5,1]:
+pp = PdfPages('multipage.pdf')
+#for mu in [-1,-0.5,0,0.5,1]:
+for mu in [0.5]:
     # define the system
     x_dot=mu*x-x**2
     y_dot=-y
     
-    # solve the system dy/dt = f(y, t)
+    # define the system dy/dt = f(y, t)
     def f(X,t):
        xval=X[0]
        yval=X[1]
@@ -29,7 +32,8 @@ for mu in [-1,-0.5,0,0.5,1]:
        return([xdv,ydv])
     
     f1=plt.figure()
-    t=np.linspace(0, 2.2, 20)   # time grid
+    tf=np.linspace(0, 4, 20)   # time grid forward
+    tb=np.linspace(0, -4, 20)   # time grid backwards
     # create a cloud of initial values (tracectory starting points)
     # We chose a combination of 3 boundaries here
     
@@ -37,34 +41,36 @@ for mu in [-1,-0.5,0,0.5,1]:
     x_max= 0.5
     y_min=-0.5
     y_max= 0.5
-    Y = np.arange(y_min, y_max, .1)
-    startvalues=[[x_max,i] for i in Y ]\
-    +[[ 0.1,i] for i in Y ]\
-    +[[-0.1,i] for i in Y ]\
-    +[[ 0.1+mu,i] for i in Y ]\
-    +[[-0.1+mu,i] for i in Y ]\
-    +[[i, y_max] for i in np.linspace(-.1,max(1.5*abs(mu),1),5)] \
-    +[[i, y_min] for i in np.linspace(-.1,max(1.5*abs(mu),1),5)]
-    x_mins=[]
-    for X0 in startvalues:
-        soln=odeint(f,X0,t)
-        xvals=soln[:,0]
-	x_mins.append(min(xvals))
-        yvals=soln[:,1]
-        plt.plot(xvals,yvals)
-    
-    #x_min=min(x_mins)
     x_max= max(1.5*abs(mu),1)
     X = np.arange(x_min, x_max, .1)
     Y = np.arange(y_min, y_max, .1)
     Xm, Ym = np.meshgrid(X, Y)
-    U= f2(Xm,Ym,x_dot)
-    V =f2(Xm,Ym,y_dot)
+    startValues=[[i,j] for i in X for j in Y]
+    #startValues=[[x_max,i] for i in Y ]\
+    #+[[ 0.2,i] for i in Y ]\
+    #+[[-0.2,i] for i in Y ]\
+    #+[[ 0.2+mu,i] for i in Y ]\
+    #+[[-0.2+mu,i] for i in Y ]\
+    #+[[i, y_max] for i in np.linspace(-.1,max(1.5*abs(mu),1),5)] \
+    #+[[i, y_min] for i in np.linspace(-.1,max(1.5*abs(mu),1),5)]
+    for X0 in startValues:
+        soln=odeint(f,X0,tf)
+        xvals=soln[:,0]
+        yvals=soln[:,1]
+        plt.plot(xvals,yvals)
+        soln=odeint(f,X0,tb)
+        xvals=soln[:,0]
+        yvals=soln[:,1]
+        plt.plot(xvals,yvals)
+    
+    U= evalOnGrid(Xm,Ym,x_dot)
+    V =evalOnGrid(Xm,Ym,y_dot)
     Q = plt.quiver( Xm,Ym, U, V,pivot="tip",units="width")
     #qk = plt.quiverkey(Q, 0.5, 0.92, 2, r'$2 \frac{m}{s}$', labelpos='W',
     #               fontproperties={'weight': 'bold'})
     plt.title("mu="+str(mu))
     plt.xlim(x_min,x_max)
+    plt.ylim(y_min,y_max)
     #plt.show()
     pp.savefig(f1)
 pp.close()
