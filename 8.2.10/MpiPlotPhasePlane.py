@@ -3,21 +3,11 @@
 from mpi4py import MPI
 import numpy as np
 import sympy as sp
-from scipy.integrate import odeint
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-from evalOnGrid import evalOnGrid
+from PhasePlanePlot import plotPhasePlane
 
 comm = MPI.COMM_WORLD
 size = comm.Get_size()
-def myrange(myrank,arr):
-    l=len(arr)
-    slicewidth=l/size
-    if myrank<size:
-        res=arr[slicewidth*rank:slicewidth*(rank+1)]
-    else:
-        res=arr[slicewidth*rank:]
-    return(res)
+rank = comm.Get_rank()
 
 x,y	=sp.symbols("x,y")
 A,B,q	=sp.symbols("A,B,q")
@@ -36,8 +26,6 @@ Jdet=J.det()
 xfix=B-A
 yfix=A/(B-A)*(1+q*(B-A**2))
 JdetFix=Jdet.subs({x:xfix,y:yfix})
-
-rank = comm.Get_rank()
 if rank == 0:
     print(J)
     print(Jdet)
@@ -47,76 +35,44 @@ if rank == 0:
     print("y="+str(yfix))
     print("The determinant of the Jacobian")
     print(JdetFix)
-    pp = PdfPages('multipage.pdf')
 
-############### start plotting ##############################################
 qval=3
+#for parDict in [{A:1,B:2,q:qval},{A:1.2,B:1.8,q:qval}]:
+for parDict in [{A:1,B:2,q:qval}]:
+    plotPhasePlane(parDict,X,X_dot)
+##########################################################################
+##########################################################################
+C_0,t =symbols("C_0, t")
+C1,C2=symbols("C1,C2",real=True,nonnegative=True)
+i1,i2=symbols("i1,i2",real=True,nonnegative=True)
+epsilon1,epsilon2=symbols("epsilon1,epsilon2",real=True,nonnegative=True)
+t_start,t_end,tn=symbols("t_start,t_end,tn") 
+#a1=i1
+#a2=i2
+C=Matrix(1,1,[C1])
+F=Matrix([C1*(sin(C1)+1+epsilon1)])
+I=Matrix(1,1,[i1])
+pprint(I)
+alphas={}
+Model=RExample(C,alphas,F,I,"positiveEigenvalueOfJacobian")
+#Css=sol[1]
+#M.suggestFixedPoint( {C1:0.876085889442093,C2:0.876085889442093})
 
-#for parDict in [{A:1,B:2,q:qval},{A:1.2,B:1.8,q:qval},{A:1.4,B:1.6,q:qval},{A:1.5,B:1.5,q:qval}]:
-for parDict in [{A:1,B:2,q:qval},{A:1.2,B:1.8,q:qval}]:
-#for parDict in [{A:1,B:2,q:qval}]:
-    x_dot_par=x_dot.subs(parDict)
-    y_dot_par=y_dot.subs(parDict)
-        
-    # define the system dy/dt = f(y, t)
-    def f(X,t):
-        xval=X[0]
-        yval=X[1]
-        xdv=x_dot_par.subs({x:xval,y:yval})
-        ydv=y_dot_par.subs({x:xval,y:yval})
-        return([xdv,ydv])
-    
-    tf=np.linspace(0, 2, 16)   # time grid forward
-    tb=np.linspace(0,-2, 16)   # time grid backwards
-    xfix_par=xfix.subs(parDict)
-    yfix_par=yfix.subs(parDict)
-    print(xfix_par)
-    print(yfix_par)
-    #x_min= xfix_par-1 
-    #x_max= xfix_par+1
-    #y_min= yfix_par-1
-    #y_max= yfix_par+1
-    x_min= 0
-    x_max= 2
-    y_min= 3
-    y_max= 5
-    res=0.065
-    res=(x_max-x_min)/40.0
-    X = np.arange(x_min, x_max, res)
-    Y = np.arange(y_min, y_max, res)
-    Xm, Ym = np.meshgrid(X, Y)
-    #startValues=[[i,j] for i in X for j in Y]
-    stepsize=4
-    startValues=[[X[i],Y[j]] for i in range(0,len(X),stepsize) for j in range(0,len(Y),stepsize)]
-    myStartValues=myrange(rank,startValues)
-    mydata=[]
-    for X0 in myStartValues:
-        soln=odeint(f,X0,tf)
-        mydata.append(soln)
-        soln=odeint(f,X0,tb)
-        mydata.append(soln)
-    #data = (rank+1)**2
-    data = comm.gather(mydata, root=0)
-    if rank == 0:
-        print("rank="+str(rank))
-        f1=plt.figure()
-        for solutionSet in data:
-            for soln in solutionSet:
-                xvals=soln[:,0]
-                yvals=soln[:,1]
-                plt.plot(xvals,yvals,color="k")
-        U= evalOnGrid(Xm,Ym,x_dot_par,[x,y])
-        V =evalOnGrid(Xm,Ym,y_dot_par,[x,y])
-        Q = plt.quiver( Xm,Ym, U, V,pivot="tip",units="width")
-        #nullclines
-        Cx=plt.contour(X,Y,U,levels=[0],colors=["r"])
-        Cy=plt.contour(X,Y,V,levels=[0],colors=["g"])
-        plt.title("A="+str(A))
-        plt.xlim(x_min,x_max)
-        plt.ylim(y_min,y_max)
-        pp.savefig(f1)
-    else:
-        assert data is None
-    	
-if rank == 0:
-    pp.close()
+ranges=[[0,100]]
+vectors=[ linspace(l[0],l[1],10) for l in ranges] 
+startValues=tuplelist(vectors)
+dic={ 
+    epsilon1:0.4,
+    epsilon2:0.1,
+    i1:10,
+    i2:10,
+    # the following always have to be present
+    C_0:Matrix(1,1,[1]),
+    t_start:0,
+    t_end:10,
+    tn:100 ,
+    # the following are needed if a numerical search for fixedpoints is to be conducted
+    "startValuesForFixedPointSearch":startValues,   
+    "plotRanges":ranges
+	}
+
