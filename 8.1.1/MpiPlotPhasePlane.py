@@ -41,6 +41,7 @@ X = np.arange(x_min, x_max, .1)
 Y = np.arange(y_min, y_max, .1)
 Xm, Ym = np.meshgrid(X, Y)
 startValues=[[i,j] for i in X for j in Y]
+print(type(startValues))
 rank = comm.Get_rank()
 myStartValues=myrange(rank,startValues)
 mydata=[]

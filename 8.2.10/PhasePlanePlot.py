@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # vim: set expandtab ts=4
 from matplotlib.backends.backend_pdf import PdfPages
 from mpi4py import MPI
