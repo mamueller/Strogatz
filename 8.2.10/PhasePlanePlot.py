@@ -10,10 +10,13 @@ from scipy.integrate import odeint
 def myrange(rank,size,arr):
     l=len(arr)
     slicewidth=l/size
+    print(rank)
+    print(l)
+    print(int(slicewidth*rank))
     if rank<size:
-        res=arr[slicewidth*rank:slicewidth*(rank+1)]
+        res=arr[int(slicewidth*rank):int(slicewidth*(rank+1))]
     else:
-        res=arr[slicewidth*rank:]
+        res=arr[int(slicewidth*rank):]
     return(res)
 
 def plotPhasePlane(parDict,X,X_dot):
@@ -40,11 +43,10 @@ def plotPhasePlane(parDict,X,X_dot):
     tf=np.linspace(0, 2, 16)   # time grid forward
     tb=np.linspace(0,-2, 16)   # time grid backwards
     x_min= 0
-    x_max= 2
-    y_min= 3
-    y_max= 5
-    res=0.65
-    res=(x_max-x_min)/40.0
+    x_max= 10000
+    y_min= 0
+    y_max= 10000
+    res=(x_max-x_min)/10.0
     X = np.arange(x_min, x_max, res)
     Y = np.arange(y_min, y_max, res)
     Xm, Ym = np.meshgrid(X, Y)

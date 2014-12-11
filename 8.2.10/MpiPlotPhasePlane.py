@@ -3,6 +3,7 @@
 from mpi4py import MPI
 import numpy as np
 import sympy as sp
+from sympy import symbols,Matrix
 from PhasePlanePlot import plotPhasePlane
 
 comm = MPI.COMM_WORLD
@@ -41,38 +42,25 @@ qval=3
 for parDict in [{A:1,B:2,q:qval}]:
     plotPhasePlane(parDict,X,X_dot)
 ##########################################################################
-##########################################################################
-C_0,t =symbols("C_0, t")
-C1,C2=symbols("C1,C2",real=True,nonnegative=True)
-i1,i2=symbols("i1,i2",real=True,nonnegative=True)
-epsilon1,epsilon2=symbols("epsilon1,epsilon2",real=True,nonnegative=True)
-t_start,t_end,tn=symbols("t_start,t_end,tn") 
-#a1=i1
-#a2=i2
-C=Matrix(1,1,[C1])
-F=Matrix([C1*(sin(C1)+1+epsilon1)])
-I=Matrix(1,1,[i1])
-pprint(I)
-alphas={}
-Model=RExample(C,alphas,F,I,"positiveEigenvalueOfJacobian")
-#Css=sol[1]
-#M.suggestFixedPoint( {C1:0.876085889442093,C2:0.876085889442093})
+C_S, C_B, C_0=symbols("C_S, C_B, C_0",real=True) 
+C=Matrix(2,1,[C_S,C_B]) 
 
-ranges=[[0,100]]
-vectors=[ linspace(l[0],l[1],10) for l in ranges] 
-startValues=tuplelist(vectors)
-dic={ 
-    epsilon1:0.4,
-    epsilon2:0.1,
-    i1:10,
-    i2:10,
-    # the following always have to be present
-    C_0:Matrix(1,1,[1]),
-    t_start:0,
-    t_end:10,
-    tn:100 ,
-    # the following are needed if a numerical search for fixedpoints is to be conducted
-    "startValuesForFixedPointSearch":startValues,   
-    "plotRanges":ranges
-	}
+#respired carbon fraction
+r=symbols("r") 
+
+# a scalar representing the Activity factor;
+# i.e. a temperature and moisture modifier (unitless)
+A_f=symbols("A_f") 
+
+# the michaelis constant 
+K_m=symbols("K_m") 
+
+#decay rates for (S)oil and (B)acteria
+k_S, k_B =symbols("k_S, k_B") 
+
+#input flux to pool S
+ADD=symbols("ADD") 
+# the alphas have to be a function of C and t (at most)
+C_dot= Matrix([[-C_B*C_S*k_S/(C_S + K_m) + C_B*k_B], [C_B*C_S*k_S*(-r + 1)/(C_S + K_m) - C_B*k_B]])
+
 
